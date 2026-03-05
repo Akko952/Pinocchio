@@ -1,0 +1,351 @@
+<?xml version="1.0" ?>
+<!-- 
+    3-SPR Parallel Robot - Exact Screw Theory Model
+    Based on provided twist coordinates (omega, v, q).
+    
+    Geometry:
+    - Base Radius (RB): ~3.887 m
+    - Platform Radius (RP): 1.0 m
+    - Initial Height (h0): 5.0 m
+-->
+<robot name="3SPR_Exact">
+
+  <!-- Materials -->
+  <material name="grey"><color rgba="0.5 0.5 0.5 1"/></material>
+  <material name="blue"><color rgba="0.0 0.0 0.8 1"/></material>
+  <material name="cyan"><color rgba="0.0 0.8 0.8 1"/></material>
+  <material name="red"><color rgba="0.8 0.0 0.0 1"/></material>
+
+  <!-- ==================== BASE LINK ==================== -->
+  <link name="base_link">
+    <visual>
+      <origin xyz="0 0 -0.1" rpy="0 0 0"/>
+      <geometry><cylinder length="0.2" radius="4.5"/></geometry>
+      <material name="grey"/>
+    </visual>
+    <inertial>
+      <mass value="1000.0"/>
+      <origin xyz="0 0 0"/>
+      <inertia ixx="100" ixy="0" ixz="0" iyy="100" iyz="0" izz="200"/>
+    </inertial>
+  </link>
+
+  <!-- ==================== LEG 1 (Accurate) ==================== -->
+  <!-- S1: [3.886751, 0, 0] -->
+  
+  <!-- J1: w=[0.866, 0, -0.5] -->
+  <joint name="leg1_joint1" type="revolute">
+    <parent link="base_link"/>
+    <child link="leg1_link1"/>
+    <origin xyz="3.886751346 0 0" rpy="0 0 0"/>
+    <axis xyz="0.866025404 0 -0.500000000"/>
+    <limit lower="-1.57" upper="1.57" effort="0" velocity="0"/>
+  </joint>
+  <link name="leg1_link1">
+    <inertial><mass value="0.01"/><origin xyz="0 0 0"/><inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/></inertial>
+  </link>
+
+  <!-- J2: w=[0, 1, 0] -->
+  <joint name="leg1_joint2" type="revolute">
+    <parent link="leg1_link1"/>
+    <child link="leg1_link2"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-1.57" upper="1.57" effort="0" velocity="0"/>
+  </joint>
+  <link name="leg1_link2">
+    <inertial><mass value="0.01"/><origin xyz="0 0 0"/><inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/></inertial>
+  </link>
+
+  <!-- J3: w=[-0.5, 0, -0.866] -->
+  <joint name="leg1_joint3" type="revolute">
+    <parent link="leg1_link2"/>
+    <child link="leg1_upper"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <axis xyz="-0.500000000 0 -0.866025404"/>
+    <limit lower="-1.57" upper="1.57" effort="0" velocity="0"/>
+  </joint>
+
+  <!-- Leg 1 Upper -->
+  <!-- Visual: Aligned with vector [-0.5, 0, 0.866] (Upward) -->
+  <!-- RPY: 0, -30 deg (-0.5236), 0 -->
+  <link name="leg1_upper">
+    <visual>
+      <origin xyz="-0.75 0 1.299" rpy="0 -0.523599 0"/>
+      <geometry><cylinder length="3.0" radius="0.15"/></geometry>
+      <material name="blue"/>
+    </visual>
+    <inertial>
+      <mass value="20.0"/>
+      <origin xyz="-0.75 0 1.299"/>
+      <inertia ixx="1.0" ixy="0" ixz="0" iyy="1.0" iyz="0" izz="0.1"/>
+    </inertial>
+  </link>
+
+  <!-- J4 (Prismatic): w=[-0.5, 0, -0.866] (Motion Down) -->
+  <!-- FLIPPED for URDF extension: [-0.5, 0, 0.866] -->
+  <joint name="leg1_joint4" type="prismatic">
+    <parent link="leg1_upper"/>
+    <child link="leg1_lower"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <axis xyz="-0.500000000 0 0.866025404"/>
+    <limit lower="0.0" upper="4.0" effort="5000" velocity="2.0"/>
+  </joint>
+
+  <!-- Leg 1 Lower -->
+  <link name="leg1_lower">
+    <visual>
+      <origin xyz="-2.25 0 3.897" rpy="0 -0.523599 0"/>
+      <geometry><cylinder length="3.0" radius="0.1"/></geometry>
+      <material name="cyan"/>
+    </visual>
+    <inertial>
+      <mass value="15.0"/>
+      <origin xyz="-2.25 0 3.897"/>
+      <inertia ixx="0.8" ixy="0" ixz="0" iyy="0.8" iyz="0" izz="0.05"/>
+    </inertial>
+  </link>
+
+  <!-- J5 (Revolute to Platform): B1=[1,0,5] -->
+  <!-- Relative Origin: B1 - S1 = [-2.88675, 0, 5] -->
+  <joint name="leg1_joint5" type="revolute">
+    <parent link="leg1_lower"/>
+    <child link="platform_link"/>
+    <origin xyz="-2.886751346 0 5.000000000" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-1.57" upper="1.57" effort="0" velocity="0"/>
+  </joint>
+
+  <!-- PLATFORM LINK (Attached to Leg 1) -->
+  <link name="platform_link">
+    <!-- Center relative to B1 [1,0,0]: [-1, 0, 0] -->
+    <!-- RPY to flat: Need to counter the -30 deg tilt of the leg? -->
+    <!-- Actually, with this setup, at q=0 the leg is pointing to B1. -->
+    <!-- But the orientation of platform_link depends on J5 and Leg1. -->
+    <!-- Since Leg1 J1-J3 are at 0, Leg1 is horizontal? No, J1-J3 align with World. -->
+    <!-- Wait, Leg1 Upper/Lower visual is tilted, but the LINK FRAME is ALIGNED WITH J3 FRAME? -->
+    <!-- NO. In URDF, link frame = joint frame. -->
+    <!-- J3 frame is World (rpy=0). -->
+    <!-- So platform_link frame is World frame (at q=0). -->
+    <!-- So we don't need tilt correction in Visual! -->
+    <visual>
+      <origin xyz="-1.0 0 0" rpy="0 0 0"/>
+      <geometry><cylinder length="0.15" radius="1.0"/></geometry>
+      <material name="red"/>
+    </visual>
+    <collision>
+      <origin xyz="-1.0 0 0" rpy="0 0 0"/>
+      <geometry><cylinder length="0.15" radius="1.0"/></geometry>
+    </collision>
+    <inertial>
+      <mass value="100.0"/>
+      <origin xyz="-1.0 0 0"/>
+      <inertia ixx="25.0" ixy="0" ixz="0" iyy="25.0" iyz="0" izz="50.0"/>
+    </inertial>
+  </link>
+
+
+  <!-- ==================== LEG 2 (Accurate) ==================== -->
+  <!-- S2: [-1.943376, 3.366025, 0] -->
+  
+  <joint name="leg2_base_fixed" type="fixed">
+      <parent link="base_link"/>
+      <child link="leg2_base_virtual"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+  <link name="leg2_base_virtual"/>
+
+  <!-- J1: w=[-0.433, 0.75, -0.5] -->
+  <joint name="leg2_joint1" type="revolute">
+    <parent link="leg2_base_virtual"/>
+    <child link="leg2_link1"/>
+    <origin xyz="-1.943375673 3.366025404 0" rpy="0 0 0"/>
+    <axis xyz="-0.433012702 0.750000000 -0.500000000"/>
+    <limit lower="-1.57" upper="1.57" effort="0" velocity="0"/>
+  </joint>
+  <link name="leg2_link1">
+    <inertial><mass value="0.01"/><origin xyz="0 0 0"/><inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/></inertial>
+  </link>
+
+  <!-- J2: w=[-0.866, -0.5, 0] -->
+  <joint name="leg2_joint2" type="revolute">
+    <parent link="leg2_link1"/>
+    <child link="leg2_link2"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <axis xyz="-0.866025404 -0.500000000 0"/>
+    <limit lower="-1.57" upper="1.57" effort="0" velocity="0"/>
+  </joint>
+  <link name="leg2_link2">
+    <inertial><mass value="0.01"/><origin xyz="0 0 0"/><inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/></inertial>
+  </link>
+
+  <!-- J3: w=[0.25, -0.433, -0.866] -->
+  <joint name="leg2_joint3" type="revolute">
+    <parent link="leg2_link2"/>
+    <child link="leg2_upper"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <axis xyz="0.250000000 -0.433012702 -0.866025404"/>
+    <limit lower="-1.57" upper="1.57" effort="0" velocity="0"/>
+  </joint>
+
+  <!-- Leg 2 Upper Visual -->
+  <!-- Vector: [-0.25, 0.433, 0.866] (Upward) -->
+  <!-- Calculated RPY to align Z-axis with this vector: -->
+  <!-- Pitch: -30 deg, Yaw: 120 deg? No. -->
+  <!-- Let's use simple math: Rotate Leg 1 visual by 120 deg around Z. -->
+  <!-- Leg 1 RPY: 0, -30d, 0. Leg 1 Vec: [-0.5, 0, 0.866] -->
+  <!-- Rot Z(120) * [-0.5, 0, 0.866] = [0.25, 0.433, 0.866] (Correct!) -->
+  <!-- So RPY = 0, -30d, 120d -->
+  <link name="leg2_upper">
+    <visual>
+      <!-- x = 1.5 * 0.25 = 0.375 -->
+      <!-- y = 1.5 * 0.433 = 0.6495 -->
+      <!-- z = 1.5 * 0.866 = 1.299 -->
+      <origin xyz="0.375 0.649519 1.299" rpy="0 -0.523599 2.094395"/> 
+      <geometry><cylinder length="3.0" radius="0.15"/></geometry>
+      <material name="blue"/>
+    </visual>
+    <inertial>
+      <mass value="20.0"/>
+      <origin xyz="0.375 0.649519 1.299"/>
+      <inertia ixx="1.0" ixy="0" ixz="0" iyy="1.0" iyz="0" izz="0.1"/>
+    </inertial>
+  </link>
+
+  <!-- J4 (Prismatic): Flipped to [-0.25, 0.433, 0.866] -->
+  <joint name="leg2_joint4" type="prismatic">
+    <parent link="leg2_upper"/>
+    <child link="leg2_lower"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <axis xyz="-0.250000000 0.433012702 0.866025404"/>
+    <limit lower="0.0" upper="4.0" effort="5000" velocity="2.0"/>
+  </joint>
+
+  <link name="leg2_lower">
+    <visual>
+      <!-- Center at 4.5m along vector -->
+      <origin xyz="1.125 1.948557 3.897" rpy="0 -0.523599 2.094395"/>
+      <geometry><cylinder length="3.0" radius="0.1"/></geometry>
+      <material name="cyan"/>
+    </visual>
+    <inertial>
+      <mass value="15.0"/>
+      <origin xyz="1.125 1.948557 3.897"/>
+      <inertia ixx="0.8" ixy="0" ixz="0" iyy="0.8" iyz="0" izz="0.05"/>
+    </inertial>
+  </link>
+
+  <!-- J5 (Revolute to Tip): B2=[-0.5, 0.866, 5] -->
+  <!-- Relative Origin: B2 - S2 = [1.443376, -2.5, 5] -->
+  <joint name="leg2_joint5" type="revolute">
+    <parent link="leg2_lower"/>
+    <child link="leg2_tip"/>
+    <origin xyz="1.443375673 -2.500000000 5.000000000" rpy="0 0 0"/>
+    <axis xyz="-0.866025404 -0.500000000 0"/> <!-- Rotated Y axis by 120 -->
+    <limit lower="-1.57" upper="1.57" effort="0" velocity="0"/>
+  </joint>
+  
+  <link name="leg2_tip">
+    <visual><geometry><sphere radius="0.1"/></geometry><material name="blue"/></visual>
+    <inertial><mass value="0.01"/><origin xyz="0 0 0"/><inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/></inertial>
+  </link>
+
+
+  <!-- ==================== LEG 3 (Accurate) ==================== -->
+  <!-- S3: [-1.943376, -3.366025, 0] -->
+
+  <joint name="leg3_base_fixed" type="fixed">
+      <parent link="base_link"/>
+      <child link="leg3_base_virtual"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+  <link name="leg3_base_virtual"/>
+
+  <!-- J1: w=[-0.433, -0.75, -0.5] -->
+  <joint name="leg3_joint1" type="revolute">
+    <parent link="leg3_base_virtual"/>
+    <child link="leg3_link1"/>
+    <origin xyz="-1.943375673 -3.366025404 0" rpy="0 0 0"/>
+    <axis xyz="-0.433012702 -0.750000000 -0.500000000"/>
+    <limit lower="-1.57" upper="1.57" effort="0" velocity="0"/>
+  </joint>
+  <link name="leg3_link1">
+    <inertial><mass value="0.01"/><origin xyz="0 0 0"/><inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/></inertial>
+  </link>
+
+  <!-- J2: w=[0.866, -0.5, 0] -->
+  <joint name="leg3_joint2" type="revolute">
+    <parent link="leg3_link1"/>
+    <child link="leg3_link2"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <axis xyz="0.866025404 -0.500000000 0"/>
+    <limit lower="-1.57" upper="1.57" effort="0" velocity="0"/>
+  </joint>
+  <link name="leg3_link2">
+    <inertial><mass value="0.01"/><origin xyz="0 0 0"/><inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/></inertial>
+  </link>
+
+  <!-- J3: w=[0.25, 0.433, -0.866] -->
+  <joint name="leg3_joint3" type="revolute">
+    <parent link="leg3_link2"/>
+    <child link="leg3_upper"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <axis xyz="0.250000000 0.433012702 -0.866025404"/>
+    <limit lower="-1.57" upper="1.57" effort="0" velocity="0"/>
+  </joint>
+
+  <!-- Leg 3 Upper Visual -->
+  <!-- Vector: [-0.25, -0.433, 0.866] (Upward) -->
+  <!-- Rot Z(240) * [-0.5, 0, 0.866] = [0.25, -0.433, 0.866] -->
+  <!-- RPY = 0, -30d, 240d -->
+  <link name="leg3_upper">
+    <visual>
+      <origin xyz="0.375 -0.649519 1.299" rpy="0 -0.523599 4.188790"/> 
+      <geometry><cylinder length="3.0" radius="0.15"/></geometry>
+      <material name="blue"/>
+    </visual>
+    <inertial>
+      <mass value="20.0"/>
+      <origin xyz="0.375 -0.649519 1.299"/>
+      <inertia ixx="1.0" ixy="0" ixz="0" iyy="1.0" iyz="0" izz="0.1"/>
+    </inertial>
+  </link>
+
+  <!-- J4 (Prismatic): Flipped to [-0.25, -0.433, 0.866] -->
+  <joint name="leg3_joint4" type="prismatic">
+    <parent link="leg3_upper"/>
+    <child link="leg3_lower"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <axis xyz="-0.250000000 -0.433012702 0.866025404"/>
+    <limit lower="0.0" upper="4.0" effort="5000" velocity="2.0"/>
+  </joint>
+
+  <link name="leg3_lower">
+    <visual>
+      <origin xyz="1.125 -1.948557 3.897" rpy="0 -0.523599 4.188790"/>
+      <geometry><cylinder length="3.0" radius="0.1"/></geometry>
+      <material name="cyan"/>
+    </visual>
+    <inertial>
+      <mass value="15.0"/>
+      <origin xyz="1.125 -1.948557 3.897"/>
+      <inertia ixx="0.8" ixy="0" ixz="0" iyy="0.8" iyz="0" izz="0.05"/>
+    </inertial>
+  </link>
+
+  <!-- J5 (Revolute to Tip): B3=[-0.5, -0.866, 5] -->
+  <!-- Relative Origin: B3 - S3 = [1.443376, 2.5, 5] -->
+  <joint name="leg3_joint5" type="revolute">
+    <parent link="leg3_lower"/>
+    <child link="leg3_tip"/>
+    <origin xyz="1.443375673 2.500000000 5.000000000" rpy="0 0 0"/>
+    <axis xyz="0.866025404 -0.500000000 0"/> <!-- Rotated Y axis by 240 -->
+    <limit lower="-1.57" upper="1.57" effort="0" velocity="0"/>
+  </joint>
+  
+  <link name="leg3_tip">
+    <visual><geometry><sphere radius="0.1"/></geometry><material name="blue"/></visual>
+    <inertial><mass value="0.01"/><origin xyz="0 0 0"/><inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/></inertial>
+  </link>
+
+</robot>
