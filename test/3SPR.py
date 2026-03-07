@@ -22,9 +22,6 @@ def display_frames(viz, model, data):
         joint_placement = data.oMi[i]
 
         frame_path = f"{frame_group_path}/{joint_name}"
-        
-        # --- 修正点 ---
-        # 将 Triad 修改为 triad (全小写)
         viz.viewer[frame_path].set_object(mg.triad(1))  # 设置坐标轴大小和线宽
         
         viz.viewer[frame_path].set_transform(joint_placement.np)
@@ -67,7 +64,7 @@ def run_visualization():
     try:
         t = 0
         while True:
-            motion = 0.5 * (1 + np.sin(t))
+            motion =  1.5 * ( np.sin(t))+0.5  # 生成一个在 [0.5, 2.0] 范围内的周期性运动
             
             if model.existJointName("leg1_joint4"):
                 q[model.joints[model.getJointId("leg1_joint4")].idx_q] = motion

@@ -71,13 +71,13 @@
   
   <link name="leg1_upper">
     <visual>
-      <origin xyz="0 0 -1" rpy="0 0 0"/>
-      <geometry><cylinder length="2.0" radius="0.15"/></geometry>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry><cylinder length="0.5" radius="0.15"/></geometry>
       <material name="blue"/>
     </visual>
     <inertial>
       <mass value="20.0"/>
-      <origin xyz="0 0 -1"/>
+      <origin xyz="0 0 0"/>
       <inertia ixx="1.0" ixy="0" ixz="0" iyy="1.0" iyz="0" izz="0.1"/>
     </inertial>
   </link>
@@ -86,21 +86,60 @@
   <joint name="leg1_joint4" type="prismatic">
     <parent link="leg1_upper"/>
     <child link="leg1_lower"/>
-    <origin xyz="0 0 -1" rpy="0 0 0"/> <!-- Start at the end of the upper link -->
+    <origin xyz="0 0 0" rpy="0 0 0"/> <!-- Start at the end of the upper link -->
     <axis xyz="0 0 -1"/>
     <limit lower="-1" upper="2.0" effort="5000" velocity="2.0"/>
   </joint>
 
   <link name="leg1_lower">
     <visual>
-      <origin xyz="0 0 -1.5" rpy="0 0 0"/>
-      <geometry><cylinder length="3.773502692" radius="0.1"/></geometry>
+      <origin xyz="0 0 -2.886751346" rpy="0 0 0"/>
+      <geometry><cylinder length="5.773502692" radius="0.1"/></geometry>
       <material name="cyan"/>
     </visual>
     <inertial>
       <mass value="15.0"/>
-      <origin xyz="0 0 -1.5"/>
+      <origin xyz="0 0 -2.886751346"/>
       <inertia ixx="0.8" ixy="0" ixz="0" iyy="0.8" iyz="0" izz="0.05"/>
+    </inertial>
+  </link>
+
+    <joint name="leg1_motion_fix" type="fixed">
+    <parent link="leg1_lower"/>
+    <child link="motion_upper"/>
+    <origin xyz="0 0 -5.773502692" rpy="1.570796 -0.523599 0"/> 
+  </joint>
+
+  <link name="motion_upper">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry><cylinder length="0.5" radius="0.15"/></geometry>
+      <material name="blue"/>
+    </visual>
+    <inertial>
+      <mass value="20.0"/>
+      <origin xyz="0 0 0"/>
+      <inertia ixx="1.0" ixy="0" ixz="0" iyy="1.0" iyz="0" izz="0.1"/>
+    </inertial>
+  </link>
+
+  <joint name="leg1_joint5" type="revolute">
+    <parent link="motion_upper"/>
+    <child link="motion_link"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-1.57" upper="1.57" effort="0" velocity="0"/>
+  </joint>
+    <link name="motion_link">
+    <visual>
+      <origin xyz="-1 0 0" rpy="1.570796 0 0"/>
+      <geometry><cylinder length="0.2" radius="1.5"/></geometry>
+      <material name="red"/>
+    </visual>
+    <inertial>
+      <mass value="1000.0"/>
+      <origin xyz="-1 0 0"/>
+      <inertia ixx="100" ixy="0" ixz="0" iyy="100" iyz="0" izz="200"/>
     </inertial>
   </link>
   <!-- End of the kinematic chain -->
