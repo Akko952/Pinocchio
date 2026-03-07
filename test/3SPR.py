@@ -3,6 +3,32 @@ import numpy as np
 import os
 import time
 from pinocchio.visualize import MeshcatVisualizer
+import meshcat.geometry as mg
+
+def display_frames(viz, model, data):
+    """
+    Displays the coordinate frames of all joints in the visualizer.
+    
+    Args:
+        viz (MeshcatVisualizer): The visualizer instance.
+        model (pin.Model): The robot model.
+        data (pin.Data): The robot data, after running forward kinematics.
+    """
+    frame_group_path = "pinocchio/frames"
+    viz.viewer[frame_group_path].delete()
+
+    for i in range(1, model.njoints):
+        joint_name = model.names[i]
+        joint_placement = data.oMi[i]
+
+        frame_path = f"{frame_group_path}/{joint_name}"
+        
+        # --- 修正点 ---
+        # 将 Triad 修改为 triad (全小写)
+        viz.viewer[frame_path].set_object(mg.triad(1))  # 设置坐标轴大小和线宽
+        
+        viz.viewer[frame_path].set_transform(joint_placement.np)
+
 
 def run_visualization():
     # 1. 确保加载的是新的 URDF 文件
@@ -16,6 +42,7 @@ def run_visualization():
 
     # 2. 加载模型
     model, collision_model, visual_model = pin.buildModelsFromUrdf(urdf_path)
+    data = model.createData()
     viz = MeshcatVisualizer(model, collision_model, visual_model)
     
     try:
@@ -28,38 +55,27 @@ def run_visualization():
     # 3. 设置初始姿态
     q = pin.neutral(model)
 
-    # === 关键修正：关节名称映射 ===
-    # 在 3SPR_Exact.urdf 中:
-    # Joint 1,2,3 = 球铰 (S)
-    # Joint 4     = 移动副 (P, Active)
-    # Joint 5     = 转动副 (R, Passive)
-    
-    # 现在的 URDF 是基于精确旋量生成的，意味着：
-    # 当所有关节角度 q=0 时，机器人的几何形状就是初始设计状态。
-    # 我们 不需要 像之前那样手动旋转 Joint 5 来调平平台，
-    # 因为 Leg 1 的 Joint 5 (R副) 的 origin 已经直接指向了 B1 点。
-    # 理论上 q=0 时，平台就是平的。
-    
-    print("模型加载成功。基于精确旋量建模，初始 q=0 应当对应水平平台。")
-    
+    # 初始计算和显示
+    pin.forwardKinematics(model, data, q)
     viz.display(q)
-
+    display_frames(viz, model, data)
+    
+    print("模型加载成功，关节坐标系已显示。")
+    
     # 4. 简单动画 (伸缩 P 副)
     print("开始演示 P 副伸缩运动...")
     try:
         t = 0
         while True:
-            motion = 0.5 * np.sin(t)
+            motion = 0.5 * (1 + np.sin(t))
             
-            # 使用新的关节名称: joint4 是 P 副
             if model.existJointName("leg1_joint4"):
                 q[model.joints[model.getJointId("leg1_joint4")].idx_q] = motion
-            if model.existJointName("leg2_joint4"):
-                q[model.joints[model.getJointId("leg2_joint4")].idx_q] = motion
-            if model.existJointName("leg3_joint4"):
-                q[model.joints[model.getJointId("leg3_joint4")].idx_q] = motion
             
+            pin.forwardKinematics(model, data, q)
             viz.display(q)
+            display_frames(viz, model, data)
+
             time.sleep(0.02)
             t += 0.05
     except KeyboardInterrupt:
