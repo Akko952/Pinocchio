@@ -31,7 +31,7 @@
     </inertial>
   </link>
 
-  <!-- ==================== LEG 1 (主链) ==================== -->
+  <!-- ==================== LEG 1 (主链：负责连接动平台) ==================== -->
   <joint name="leg1_joint1" type="revolute">
     <parent link="base_link"/>
     <child link="leg1_s1"/>
@@ -42,7 +42,6 @@
   <link name="leg1_s1">
     <inertial>
       <mass value="0.1"/>
-      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
       <inertia ixx="0.01" ixy="0.0" ixz="0.0" iyy="0.01" iyz="0.0" izz="0.01"/>
     </inertial>
   </link>
@@ -50,14 +49,12 @@
   <joint name="leg1_joint2" type="revolute">
     <parent link="leg1_s1"/>
     <child link="leg1_s2"/>
-    <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
     <axis xyz="0.0 1.0 0.0"/>
     <limit lower="-1.57" upper="1.57" effort="100.0" velocity="1.0"/>
   </joint>
   <link name="leg1_s2">
     <inertial>
       <mass value="0.1"/>
-      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
       <inertia ixx="0.01" ixy="0.0" ixz="0.0" iyy="0.01" iyz="0.0" izz="0.01"/>
     </inertial>
   </link>
@@ -65,14 +62,12 @@
   <joint name="leg1_joint3" type="revolute">
     <parent link="leg1_s2"/>
     <child link="leg1_s3"/>
-    <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
     <axis xyz="-0.5 0.0 -0.866025"/>
     <limit lower="-1.57" upper="1.57" effort="100.0" velocity="1.0"/>
   </joint>
   <link name="leg1_s3">
     <inertial>
       <mass value="0.1"/>
-      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
       <inertia ixx="0.01" ixy="0.0" ixz="0.0" iyy="0.01" iyz="0.0" izz="0.01"/>
     </inertial>
   </link>
@@ -87,9 +82,7 @@
   <link name="leg1_lower">
     <visual>
       <origin xyz="0.0 0.0 -1.88675" rpy="0.0 0.0 0.0"/>
-      <geometry>
-        <cylinder length="7.7735" radius="0.1"/>
-      </geometry>
+      <geometry><cylinder length="7.7735" radius="0.1"/></geometry>
       <material name="cyan"/>
     </visual>
     <inertial>
@@ -107,49 +100,39 @@
     <limit lower="-1.57" upper="1.57" effort="100.0" velocity="1.0"/>
   </joint>
 
-  <!-- ==================== MOVING PLATFORM ==================== -->
+  <!-- ==================== MOVING PLATFORM (动平台) ==================== -->
   <link name="motion_link">
     <visual>
       <origin xyz="-1 0.0 0.0" rpy="1.570796 0.0 0.0"/>
-      <geometry>
-        <cylinder length="0.2" radius="2"/>
-      </geometry>
+      <geometry><cylinder length="0.2" radius="1.5"/></geometry>
       <material name="red"/>
     </visual>
     <inertial>
       <mass value="10.0"/>
-      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
       <inertia ixx="1.0" ixy="0.0" ixz="0.0" iyy="1.0" iyz="0.0" izz="2.0"/>
     </inertial>
   </link>
 
+  <!-- 动平台上的闭环锚点 -->
   <joint name="leg2_anchor_joint" type="fixed">
     <parent link="motion_link"/>
-    <child link="leg2_anchor"/>
-    <origin xyz="-1.5 0.0 0.866025" rpy="0 -2.094395 0"/>
+    <child link="leg2_anchor_frame"/>
+    <origin xyz="-1.5 0 -0.866025" rpy="0 -2.094395 0"/>
   </joint>
-  <link name="leg2_anchor">
-    <inertial>
-      <mass value="0.01"/>
-      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
-      <inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0" izz="0.001"/>
-    </inertial>
+  <link name="leg2_anchor_frame">
+    <inertial><mass value="0.001"/><inertia ixx="0.0001" ixy="0.0" ixz="0.0" iyy="0.0001" iyz="0.0" izz="0.0001"/></inertial>
   </link>
 
   <joint name="leg3_anchor_joint" type="fixed">
     <parent link="motion_link"/>
-    <child link="leg3_anchor"/>
-    <origin xyz="-1.5 0.0 -0.866025 " rpy="0.0 2.094395 0.0"/>
+    <child link="leg3_anchor_frame"/>
+    <origin xyz="-1.5 0 0.866025 " rpy="0.0 2.094395 0.0"/>
   </joint>
-  <link name="leg3_anchor">
-    <inertial>
-      <mass value="0.01"/>
-      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
-      <inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0" izz="0.001"/>
-    </inertial>
+  <link name="leg3_anchor_frame">
+    <inertial><mass value="0.001"/><inertia ixx="0.0001" ixy="0.0" ixz="0.0" iyy="0.0001" iyz="0.0" izz="0.0001"/></inertial>
   </link>
 
-  <!-- ==================== LEG 2 (从链) ==================== -->
+  <!-- ==================== LEG 2 (从链：末端悬空) ==================== -->
   <joint name="leg2_joint1" type="revolute">
     <parent link="base_link"/>
     <child link="leg2_s1"/>
@@ -158,41 +141,27 @@
     <limit lower="-1.57" upper="1.57" effort="100.0" velocity="1.0"/>
   </joint>
   <link name="leg2_s1">
-    <inertial>
-      <mass value="0.1"/>
-      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
-      <inertia ixx="0.01" ixy="0.0" ixz="0.0" iyy="0.01" iyz="0.0" izz="0.01"/>
-    </inertial>
+    <inertial><mass value="0.1"/><inertia ixx="0.01" ixy="0.0" ixz="0.0" iyy="0.01" iyz="0.0" izz="0.01"/></inertial>
   </link>
 
   <joint name="leg2_joint2" type="revolute">
     <parent link="leg2_s1"/>
     <child link="leg2_s2"/>
-    <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
     <axis xyz="0.0 1.0 0.0"/>
     <limit lower="-1.57" upper="1.57" effort="100.0" velocity="1.0"/>
   </joint>
   <link name="leg2_s2">
-    <inertial>
-      <mass value="0.1"/>
-      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
-      <inertia ixx="0.01" ixy="0.0" ixz="0.0" iyy="0.01" iyz="0.0" izz="0.01"/>
-    </inertial>
+    <inertial><mass value="0.1"/><inertia ixx="0.01" ixy="0.0" ixz="0.0" iyy="0.01" iyz="0.0" izz="0.01"/></inertial>
   </link>
 
   <joint name="leg2_joint3" type="revolute">
     <parent link="leg2_s2"/>
     <child link="leg2_s3"/>
-    <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
     <axis xyz="-0.5 0.0 -0.866025"/>
     <limit lower="-1.57" upper="1.57" effort="100.0" velocity="1.0"/>
   </joint>
   <link name="leg2_s3">
-    <inertial>
-      <mass value="0.1"/>
-      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
-      <inertia ixx="0.01" ixy="0.0" ixz="0.0" iyy="0.01" iyz="0.0" izz="0.01"/>
-    </inertial>
+    <inertial><mass value="0.1"/><inertia ixx="0.01" ixy="0.0" ixz="0.0" iyy="0.01" iyz="0.0" izz="0.01"/></inertial>
   </link>
 
   <joint name="leg2_joint4" type="prismatic">
@@ -205,9 +174,7 @@
   <link name="leg2_lower">
     <visual>
       <origin xyz="0.0 0.0 -1.88675" rpy="0.0 0.0 0.0"/>
-      <geometry>
-        <cylinder length="7.7735" radius="0.1"/>
-      </geometry>
+      <geometry><cylinder length="7.7735" radius="0.1"/></geometry>
       <material name="cyan"/>
     </visual>
     <inertial>
@@ -219,20 +186,16 @@
 
   <joint name="leg2_joint5" type="revolute">
     <parent link="leg2_lower"/>
-    <child link="leg2_tip"/>
+    <child link="leg2_tip_frame"/>
     <origin xyz="0.0 0.0 -5.7735" rpy="1.570796 -0.523599 0.0"/>
     <axis xyz="0.0 1.0 0.0"/>
     <limit lower="-1.57" upper="1.57" effort="100.0" velocity="1.0"/>
   </joint>
-  <link name="leg2_tip">
-    <inertial>
-      <mass value="0.01"/>
-      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
-      <inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0" izz="0.001"/>
-    </inertial>
+  <link name="leg2_tip_frame">
+    <inertial><mass value="0.01"/><inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0" izz="0.001"/></inertial>
   </link>
 
-  <!-- ==================== LEG 3 (从链) ==================== -->
+  <!-- ==================== LEG 3 (从链：末端悬空) ==================== -->
   <joint name="leg3_joint1" type="revolute">
     <parent link="base_link"/>
     <child link="leg3_s1"/>
@@ -241,41 +204,27 @@
     <limit lower="-1.57" upper="1.57" effort="100.0" velocity="1.0"/>
   </joint>
   <link name="leg3_s1">
-    <inertial>
-      <mass value="0.1"/>
-      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
-      <inertia ixx="0.01" ixy="0.0" ixz="0.0" iyy="0.01" iyz="0.0" izz="0.01"/>
-    </inertial>
+    <inertial><mass value="0.1"/><inertia ixx="0.01" ixy="0.0" ixz="0.0" iyy="0.01" iyz="0.0" izz="0.01"/></inertial>
   </link>
 
   <joint name="leg3_joint2" type="revolute">
     <parent link="leg3_s1"/>
     <child link="leg3_s2"/>
-    <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
     <axis xyz="0.0 1.0 0.0"/>
     <limit lower="-1.57" upper="1.57" effort="100.0" velocity="1.0"/>
   </joint>
   <link name="leg3_s2">
-    <inertial>
-      <mass value="0.1"/>
-      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
-      <inertia ixx="0.01" ixy="0.0" ixz="0.0" iyy="0.01" iyz="0.0" izz="0.01"/>
-    </inertial>
+    <inertial><mass value="0.1"/><inertia ixx="0.01" ixy="0.0" ixz="0.0" iyy="0.01" iyz="0.0" izz="0.01"/></inertial>
   </link>
 
   <joint name="leg3_joint3" type="revolute">
     <parent link="leg3_s2"/>
     <child link="leg3_s3"/>
-    <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
     <axis xyz="-0.5 0.0 -0.866025"/>
     <limit lower="-1.57" upper="1.57" effort="100.0" velocity="1.0"/>
   </joint>
   <link name="leg3_s3">
-    <inertial>
-      <mass value="0.1"/>
-      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
-      <inertia ixx="0.01" ixy="0.0" ixz="0.0" iyy="0.01" iyz="0.0" izz="0.01"/>
-    </inertial>
+    <inertial><mass value="0.1"/><inertia ixx="0.01" ixy="0.0" ixz="0.0" iyy="0.01" iyz="0.0" izz="0.01"/></inertial>
   </link>
 
   <joint name="leg3_joint4" type="prismatic">
@@ -288,9 +237,7 @@
   <link name="leg3_lower">
     <visual>
       <origin xyz="0.0 0.0 -1.88675" rpy="0.0 0.0 0.0"/>
-      <geometry>
-        <cylinder length="7.7735" radius="0.1"/>
-      </geometry>
+      <geometry><cylinder length="7.7735" radius="0.1"/></geometry>
       <material name="cyan"/>
     </visual>
     <inertial>
@@ -302,17 +249,13 @@
 
   <joint name="leg3_joint5" type="revolute">
     <parent link="leg3_lower"/>
-    <child link="leg3_tip"/>
+    <child link="leg3_tip_frame"/>
     <origin xyz="0.0 0.0 -5.7735" rpy="1.570796 -0.523599 0.0"/>
     <axis xyz="0.0 1.0 0.0"/>
     <limit lower="-1.57" upper="1.57" effort="100.0" velocity="1.0"/>
   </joint>
-  <link name="leg3_tip">
-    <inertial>
-      <mass value="0.01"/>
-      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
-      <inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0" izz="0.001"/>
-    </inertial>
+  <link name="leg3_tip_frame">
+    <inertial><mass value="0.01"/><inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0" izz="0.001"/></inertial>
   </link>
 
 </robot>

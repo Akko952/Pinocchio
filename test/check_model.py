@@ -1,7 +1,7 @@
 import pinocchio as pin
 import numpy as np
 
-urdf_path = "test/real_3SPR.urdf"
+urdf_path = "test/real_3SPR_copy.urdf"
 
 model = pin.buildModelFromUrdf(urdf_path)
 data = model.createData()
