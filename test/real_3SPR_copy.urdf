@@ -187,7 +187,7 @@
   <joint name="leg2_joint5" type="revolute">
     <parent link="leg2_lower"/>
     <child link="leg2_tip_frame"/>
-    <origin xyz="0.0 0.0 -5.7735" rpy="1.570796 -0.523599 0.0"/>
+    <origin xyz="0.0 0.0 -5.7735" rpy="1.570796 -0.523599 2.094395"/>
     <axis xyz="0.0 1.0 0.0"/>
     <limit lower="-1.57" upper="1.57" effort="100.0" velocity="1.0"/>
   </joint>
@@ -250,7 +250,7 @@
   <joint name="leg3_joint5" type="revolute">
     <parent link="leg3_lower"/>
     <child link="leg3_tip_frame"/>
-    <origin xyz="0.0 0.0 -5.7735" rpy="1.570796 -0.523599 0.0"/>
+    <origin xyz="0.0 0.0 -5.7735" rpy="1.570796 -0.523599 0"/>
     <axis xyz="0.0 1.0 0.0"/>
     <limit lower="-1.57" upper="1.57" effort="100.0" velocity="1.0"/>
   </joint>

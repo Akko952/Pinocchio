@@ -17,7 +17,7 @@ def display_all_frames(viz, model, data, axis_scale=1.0):
         frame_path = f"visualizer/frames/{frame.name}"
         
         # 设置巨大的坐标轴 (triad)
-        # axis_scale=1.0 已经非常大，可以根据需要调至 1.5 或 2.0
+        axis_scale=2.0 #已经非常大，可以根据需要调至 1.5 或 2.0
         viz.viewer[frame_path].set_object(mg.triad(axis_scale))
         
         # 更新位置
